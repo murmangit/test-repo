@@ -1,0 +1,9 @@
+name=splunk-sink-connector
+connector.class=com.splunk.kafka.connect.SplunkSinkConnector
+tasks.max=1
+topics=your-kafka-topic
+splunk.hec.uri=http://localhost:8088
+splunk.hec.token=<YOUR_HEC_TOKEN>
+splunk.hec.ssl.validate.certs=false
+splunk.hec.json.event.formatted=true
+splunk.hec.ack.enabled=false
