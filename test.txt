@@ -1,1 +1,3 @@
-curl -k http://localhost:8085/services/collector -H "Authorization: Splunk YOUR_HEC_TOKEN" -H "X-Splunk-Request-Channel: UNIQUE_CHANNEL_ID" -d '{"event": "hello world"}'
+key.converter=org.apache.kafka.connect.storage.StringConverter
+value.converter=org.apache.kafka.connect.json.JsonConverter
+value.converter.schemas.enable=false
