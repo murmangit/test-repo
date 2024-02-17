@@ -1,1 +1,1 @@
-curl -k https://localhost:8088/services/collector/health -H "Authorization: Splunk <YOUR_HEC_TOKEN>"
+curl -k http://localhost:8085/services/collector -H "Authorization: Splunk YOUR_HEC_TOKEN" -H "X-Splunk-Request-Channel: UNIQUE_CHANNEL_ID" -d '{"event": "hello world"}'
