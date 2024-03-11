@@ -1,1 +1,18 @@
-test
+pipeline {
+    agent any
+
+    stages {
+        stage('Example') {
+            steps {
+                script {
+                    if (env.GIT_BRANCH != null) {
+                        def branchName = env.GIT_BRANCH.split('/')[-1]
+                        echo "The branch being built is ${branchName}"
+                    } else {
+                        echo "GIT_BRANCH not available"
+                    }
+                }
+            }
+        }
+    }
+}
