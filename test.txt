@@ -1,8 +1,1 @@
-graph TD;
-    GlobalEndpoint[Global Endpoint Cloud] -->|Directs Traffic| Region1[us-east-1 Cloud];
-    GlobalEndpoint -->|Directs Traffic| Region2[us-east-2 Cloud];
-    Region1 <-->|Bidirectional Traffic| Region2;
-    Region1 -.->|Fails| Region2[us-east-2 Cloud];
-    Region2 -.->|Fails| Region1[us-east-1 Cloud];
-    classDef cloud fill:#f9f,stroke:#333,stroke-width:2px;
-    class GlobalEndpoint,Region1,Region2 cloud;
+d
