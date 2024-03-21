@@ -1,1 +1,1 @@
-keytool -genkeypair -alias splunkConnectorKey -keyalg RSA -keysize 2048 -storetype PKCS12 -keystore splunk-keystore.p12 -validity 3650 -dname "CN=Your Name, OU=Your Organization, O=Your Company, L=Your City, S=Your State, C=Your Country" -storepass yourpassword
+test
