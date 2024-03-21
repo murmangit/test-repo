@@ -1,1 +1,1 @@
-test
+sudo lsof -ti:8000 | xargs sudo kill -9
