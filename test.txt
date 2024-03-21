@@ -1,1 +1,38 @@
-d
+{
+  "name": "SplunkSourceConnector",
+  "config": {
+    "connector.class": "io.confluent.connect.SplunkHttpSourceConnector",
+    "tasks.max": "1",
+    "topics": "splunk-kafka-topic",
+    "splunk.collector.index.default": "main",
+    "splunk.ssl.key.store.password": "your_keystore_password",
+    "splunk.port": "8088",
+    "topic.per.index": "false",
+    "splunk.collector.authentication.tokens": "your_splunk_hec_token",
+    "splunk.ssl.key.store.path": "/path/to/your/keystore",
+    "splunk.collector.index.allowed": "main,other_index",
+    "splunk.collector.url": "/services/collector/event",
+    "splunk.ssl.renegotiation.allowed": "true",
+    "batch.size": "100",
+    "backoff.ms": "100"
+  }
+}
+
+
+
+{
+  "name": "SplunkSourceConnector",
+  "config": {
+    "connector.class": "io.confluent.connect.SplunkHttpSourceConnector",
+    "tasks.max": "1",
+    "topics": "splunk-kafka-topic",
+    "splunk.collector.index.default": "main",
+    "splunk.port": "8088",
+    "topic.per.index": "false",
+    "splunk.collector.authentication.tokens": "your_splunk_hec_token",
+    "splunk.collector.index.allowed": "main,other_index",
+    "splunk.collector.url": "/services/collector/event",
+    "batch.size": "100",
+    "backoff.ms": "100"
+  }
+}
