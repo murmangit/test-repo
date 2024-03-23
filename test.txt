@@ -8,3 +8,26 @@
 "errors.log.include.messages": true
 
 }
+
+
+
+{
+  "name": "splunk-source-connector",
+  "config": {
+    "connector.class": "com.splunk.kafka.connect.SplunkSourceConnector",
+    "tasks.max": "1",
+    "kafka.topic": "your_kafka_topic",
+    "splunk.indexes": "main",
+    "splunk.url": "http://your-splunk-instance:8089",
+    "splunk.token": "your_splunk_hec_token",
+    "poll.interval.ms": "5000",
+    "splunk.sourcetypes": "your_sourcetype",
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false",
+    "errors.tolerance": "all",
+    "errors.log.enable": "true",
+    "errors.log.include.messages": "true"
+  }
+}
+
