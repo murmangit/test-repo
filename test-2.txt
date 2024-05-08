@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Request Details</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+  }
+  .container {
+    max-width: 1200px; /* Extended width */
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  th, td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    max-width: 300px; /* Set maximum width for topic name and group id */
+    word-wrap: break-word; /* Wrap long text */
+  }
+  th {
+    background-color: #f2f2f2;
+  }
+  td button {
+    padding: 5px 10px;
+    margin-right: 5px;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+  }
+  td .approve-button {
+    color: #fff;
+    background-color: #28a745;
+  }
+  td .deny-button {
+    color: #fff;
+    background-color: #dc3545;
+  }
+  td .view-button {
+    color: #fff;
+    
+  }
+  td button:hover {
+    opacity: 0.9;
+  }
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+  .modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    max-width: 600px;
+  }
+  .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .popup-content {
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    text-align: center;
+  }
+  .popup-content button {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  .popup-content button:hover {
+    opacity: 0.9;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <table>
+    <thead>
+      <tr>
+        <th>Request ID</th>
+        <th>Topic Name</th>
+        <th>Capacity</th>
+        <th>Group Id</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="request-id">001</td>
+        <td>customer.sdf.adfafsersdfasdf-mid-dpsodf-publsdf.json.aws.iosd.dflsf</td>
+        <td>10</td>
+        <td>consumer-group-adfkadsf-adsfasf.asdfas.asdfasdfjkasdkfadsf</td>
+        <td>Pending</td>
+        <td>
+          <button class="approve-button" onclick="showApprovePopup()">Approve</button>
+          <button class="deny-button" onclick="showDenyPopup()">Deny</button>
+          <button class="view-button" onclick="showDetails('001')">&#128065;</button> <!-- Eye icon -->
+        </td>
+      </tr>
+      <tr>
+        <td class="request-id">002</td>
+        <td>customer.sdf.adfafsersdfasdf-mid-dpsodf-publsdf.json.aws.iosd.dflsf</td>
+        <td>15</td>
+        <td>consumer-group-adfkadsf-adsfasf.asdfas.asdfasdfjkasdkfadsf</td>
+        <td>Approved</td>
+        <td>
+          <button class="approve-button" onclick="showApprovePopup()">Approve</button>
+          <button class="deny-button" onclick="showDenyPopup()">Deny</button>
+          <button class="view-button" onclick="showDetails('002')">&#128065;</button> <!-- Eye icon -->
+        </td>
+      </tr>
+      <!-- Add more rows as needed -->
+    </tbody>
+  </table>
+</div>
+
+<div id="approvePopup" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeApprovePopup()">&times;</span>
+    <div class="popup-content">
+      <h2>Approve Request</h2>
+      <p>Are you sure you want to approve this request?</p>
+      <button class="approve-button" onclick="approveRequest()">Yes</button>
+      <button class="deny-button" onclick="closeApprovePopup()">No</button>
+    </div>
+  </div>
+</div>
+
+<div id="denyPopup" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeDenyPopup()">&times;</span>
+    <div class="popup-content">
+      <h2>Deny Request</h2>
+      <p>Please enter the reason for denying:</p>
+      <textarea id="denyReason" rows="4" cols="50"></textarea><br>
+      <button class="deny-button" onclick="denyRequest()">Deny</button>
+      <button class="approve-button" onclick="closeDenyPopup()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="myModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <h2>Request Details</h2>
+    <table>
+      <tr>
+        <td>Topic:</td>
+        <td><span id="topic_d"></span></td>
+      </tr>
+      <tr>
+        <td>Created By:</td>
+        <td><span id="created_by"></span></td>
+      </tr>
+      <tr>
+        <td>Transaction ID:</td>
+        <td><span id="transaction_id"></span></td>
+      </tr>
+      <tr>
+        <td>Type:</td>
+        <td><span id="type"></span></td>
+      </tr>
+      <tr>
+        <td>Comments:</td>
+        <td><span id="comments"></span></td>
+      </tr>
+      <tr>
+        <td>App:</td>
+        <td><span id="app"></span></td>
+      </tr>
+      <tr>
+        <td>Product:</td>
+        <td><span id="product"></span></td>
+      </tr>
+      <!-- Certificates -->
+      <tr>
+        <td>DEV Cert:</td>
+        <td><span id="dev_cert"></span></td>
+      </tr>
+      <tr>
+        <td>QA Cert:</td>
+        <td><span id="qa_cert"></span></td>
+      </tr>
+      <tr>
+        <td>UAT Cert:</td>
+        <td><span id="uat_cert"></span></td>
+      </tr>
+      <tr>
+        <td>PROD Cert:</td>
+        <td><span id="prod_cert"></span></td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<script>
+  function showDetails(requestId) {
+    // Dummy data, you can replace it with your actual data retrieval logic
+    document.getElementById("topic_d").textContent = "Topic 1";
+    document.getElementById("created_by").textContent = "John Doe";
+    document.getElementById("transaction_id").textContent = "123456789";
+    document.getElementById("type").textContent = "Type A";
+    document.getElementById("comments").textContent = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
+    document.getElementById("app").textContent = "App A";
+    document.getElementById("product").textContent = "Product X";
+
+    // Certificates
+    document.getElementById("dev_cert").textContent = "rd223434-ddd-dsfdev-east1-op32343234-rwer-3leskdf.adkesdrkes-dev.cld-non-prod.xxxx.com";
+    document.getElementById("qa_cert").textContent = "rd223434-ddd-dsfdev-east1-op32343234-rwer-3leskdf.adkesdrkes-qa.cld-non-prod.xxxx.com";
+    document.getElementById("uat_cert").textContent = "rd223434-ddd-dsfdev-east1-op32343234-rwer-3leskdf.adkesdrkes-uat.cld-non-prod.xxxx.com";
+    document.getElementById("prod_cert").textContent = "rd223434-ddd-dsfdev-east1-op32343234-rwer-3leskdf.adkesdrkes-prod.cld-non-prod.xxxx.com";
+
+    // Display modal
+    document.getElementById("myModal").style.display = "block";
+  }
+
+  function closeModal() {
+    // Hide modal
+    document.getElementById("myModal").style.display = "none";
+  }
+
+  function showApprovePopup() {
+    // Display approve popup
+    document.getElementById("approvePopup").style.display = "block";
+  }
+
+  function closeApprovePopup() {
+    // Hide approve popup
+    document.getElementById("approvePopup").style.display = "none";
+  }
+
+  function approveRequest() {
+    alert("Request approved successfully!");
+    closeApprovePopup();
+  }
+
+  function showDenyPopup() {
+    // Display deny popup
+    document.getElementById("denyPopup").style.display = "block";
+  }
+
+  function closeDenyPopup() {
+    // Hide deny popup
+    document.getElementById("denyPopup").style.display = "none";
+  }
+
+  function denyRequest() {
+    var reason = document.getElementById("denyReason").value;
+    if (reason !== null && reason !== "") {
+      alert("Request denied. Reason: " + reason);
+      closeDenyPopup();
+    } else {
+      alert("Please provide a reason for denying the request.");
+    }
+  }
+</script>
+
+</body>
+</html>
+
+
+form
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Form</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+  }
+  .container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  .form-group {
+    margin-bottom: 20px;
+  }
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+  }
+  .form-group input[type="radio"] {
+    display: inline-block;
+    margin-right: 8px;
+  }
+  .form-group input[type="radio"]:checked + label {
+    color: #333;
+  }
+  .form-group input[type="text"],
+  .form-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+  .search-box {
+    position: relative;
+  }
+  .search-box input[type="text"] {
+    border: none;
+    border-bottom: 1px solid #ddd;
+    width: calc(100% - 24px);
+    padding: 8px;
+    margin-bottom: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .search-box::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background-color: #007bff;
+    z-index: 1;
+  }
+  .search-box::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0%;
+    height: 1px;
+    background-color: #007bff;
+    transition: width 0.3s ease;
+    z-index: 2;
+  }
+  .search-box input[type="text"]:focus + .search-box::after {
+    width: 100%;
+  }
+  .search-box ul {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: calc(100% - 2px);
+    z-index: 3;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: none;
+  }
+  .search-box ul li {
+    padding: 8px;
+    cursor: pointer;
+  }
+  .search-box ul li:hover {
+    background-color: #f0f0f0;
+  }
+  .tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+  .tag {
+    background-color: #007bff;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-right: 8px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+  }
+  .tag-text {
+    margin-right: 4px;
+  }
+  /* New style for the Cert section */
+  .cert-section {
+    border-top: 1px solid #ddd;
+    padding-top: 20px;
+    margin-top: 20px;
+  }
+  .cert-section label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .cert-group {
+    display: none;
+    padding-left: 20px;
+  }
+  .cert-group .form-group {
+    margin-bottom: 10px;
+  }
+  .cert-group label {
+    font-weight: normal;
+  }
+  .cert-section input[type="checkbox"] {
+    display: none;
+  }
+  .cert-section input[type="checkbox"] + label:before {
+    content: "+";
+    display: inline-block;
+    margin-right: 5px;
+  }
+  .cert-section input[type="checkbox"]:checked + label:before {
+    content: "-";
+  }
+  /* New style for the buttons */
+  .btn-container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 20px;
+  }
+  .btn-container button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+  }
+  .btn-container button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .btn-container button.cancel {
+    background-color: #dc3545;
+    color: #fff;
+    margin-right: 10px;
+  }
+  .btn-container button.submit {
+    background-color: #007bff;
+    color: #fff;
+  }
+  /* New style for the textboxes dropdown */
+  .select-dropdown {
+    position: relative;
+  }
+  .select-dropdown select {
+    width: calc(100% - 24px);
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-color: #fff;
+    cursor: pointer;
+  }
+  .select-dropdown::before {
+    content: '\25BC';
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+  .checkbox-inline {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 20px;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <form>
+    <div class="form-group">
+      
+      <label for="streaming">Streaming service</label>
+    </div>
+    <div class="form-group">
+      <label for="application">Application</label>
+      <select id="application" name="application" class="select-dropdown">
+        <option value="app1">Application 1</option>
+        <option value="app2">Application 2</option>
+        <option value="app3">Application 3</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="topic">Topic</label>
+      <select id="topic" name="topic" class="select-dropdown">
+        <!-- Populated dynamically based on selected application -->
+      </select>
+    </div>
+    <div class="form-group search-box">
+      <label for="search">Search and select event</label>
+      <input type="text" id="search" name="search" placeholder="Enter at least three words">
+      <ul>
+        <!-- Suggestions will be added here -->
+      </ul>
+    </div>
+    <div class="tags-container" id="tagsContainer">
+      <!-- Selected tags will be added here -->
+    </div>
+    <!-- New Cert section -->
+    <div class="cert-section">
+      <input type="checkbox" id="certToggle" class="cert-toggle">
+      <label for="certToggle">Cert</label>
+      <div class="cert-group">
+        <div class="form-group">
+          <label for="dev">Dev</label>
+          <input type="text" id="dev" name="dev">
+        </div>
+        <div class="form-group">
+          <label for="qa">QA</label>
+          <input type="text" id="qa" name="qa">
+        </div>
+        <div class="form-group">
+          <label for="uat">UAT</label>
+          <input type="text" id="uat" name="uat">
+        </div>
+        <div class="form-group">
+          <label for="prod">PROD</label>
+          <input type="text" id="prod" name="prod">
+        </div>
+      </div>
+    </div>
+    <!-- New fields for Name and Capacity -->
+    <div class="form-group">
+      <label for="name">Name</label>
+      <input type="text" id="name" name="name">
+    </div>
+    <div class="form-group">
+      <label for="capacity">Capacity</label>
+      <input type="text" id="capacity" name="capacity">
+    </div>
+    <!-- Checkboxes section -->
+    <div class="form-group">
+      <div class="checkbox-inline">
+        <input type="checkbox" id="checkbox1" name="checkbox1">
+        <label for="checkbox1">Checkbox 1</label>
+      </div>
+      <br>
+      <div class="checkbox-inline">
+        <input type="checkbox" id="checkbox2" name="checkbox2">
+        <label for="checkbox2">Checkbox 2</label>
+      </div>
+      <br>
+      <div class="checkbox-inline">
+        <input type="checkbox" id="checkbox3" name="checkbox3">
+        <label for="checkbox3">Checkbox 3</label>
+      </div>
+    </div>
+    <!-- Buttons section -->
+    <div class="btn-container">
+      <button type="button" class="cancel">Cancel</button>
+      <button type="submit" class="submit" disabled>Submit</button>
+    </div>
+  </form>
+</div>
+
+<script>
+  // JavaScript code for auto-suggest functionality
+  const searchInput = document.getElementById('search');
+  const suggestionsList = document.querySelector('.search-box ul');
+  const suggestions = ['accounts.form.test', 'accounts.dummy.test', 'accounts.example.test', 'users.form.test', 'users.dummy.test', 'users.example.test'];
+  const tagsContainer = document.getElementById('tagsContainer');
+
+  searchInput.addEventListener('input', function() {
+    const value = this.value.trim();
+    suggestionsList.innerHTML = '';
+    if (value !== '' && value.length >= 3) {
+      const regex = new RegExp(`${value}`, 'gi');
+      suggestions.forEach(suggestion => {
+        if (suggestion.match(regex)) {
+          const listItem = document.createElement('li');
+          listItem.textContent = suggestion;
+          suggestionsList.appendChild(listItem);
+        }
+      });
+      suggestionsList.style.display = 'block';
+    } else {
+      suggestionsList.style.display = 'none';
+    }
+  });
+
+  suggestionsList.addEventListener('click', function(event) {
+    if (event.target.tagName === 'LI') {
+      const tagText = event.target.textContent;
+      const tag = document.createElement('div');
+      tag.classList.add('tag');
+      tag.innerHTML = `<span class="tag-text">${tagText}</span><button type="button">X</button>`;
+      tagsContainer.appendChild(tag);
+      searchInput.value = '';
+      suggestionsList.style.display = 'none';
+    }
+  });
+
+  // Remove tag when close button is clicked
+  tagsContainer.addEventListener('click', function(event) {
+    if (event.target.tagName === 'BUTTON') {
+      event.target.parentNode.remove();
+    }
+  });
+
+  // JavaScript code for dynamically populating topics based on selected application
+  const applicationSelect = document.getElementById('application');
+  const topicSelect = document.getElementById('topic');
+  const topics = {
+    app1: ['Topic 1A', 'Topic 1B', 'Topic 1C'],
+    app2: ['Topic 2A', 'Topic 2B', 'Topic 2C'],
+    app3: ['Topic 3A', 'Topic 3B', 'Topic 3C']
+  };
+
+  applicationSelect.addEventListener('change', function() {
+    const selectedApplication = this.value;
+    const topicOptions = topics[selectedApplication];
+    while (topicSelect.options.length > 0) {
+      topicSelect.remove(0);
+    }
+    topicOptions.forEach(topic => {
+      const option = new Option(topic, topic);
+      topicSelect.add(option);
+    });
+  });
+
+  // Populate topics for the default selected application
+  const defaultApplication = applicationSelect.value;
+  const defaultTopicOptions = topics[defaultApplication];
+  defaultTopicOptions.forEach(topic => {
+    const option = new Option(topic, topic);
+    topicSelect.add(option);
+  });
+
+  // Enable Submit button only if all fields are filled
+  const submitButton = document.querySelector('.btn-container button.submit');
+  const inputs = document.querySelectorAll('input[type="text"], input[type="checkbox"]');
+  inputs.forEach(input => {
+    input.addEventListener('input', () => {
+      const allFilled = [...inputs].every(input => input.value.trim() !== '');
+      submitButton.disabled = !allFilled;
+    });
+  });
+
+  // Expand/Collapse Cert section
+  const certToggle = document.getElementById('certToggle');
+  const certGroup = document.querySelector('.cert-group');
+  certToggle.addEventListener('change', () => {
+    if (certToggle.checked) {
+      certGroup.style.display = 'block';
+    } else {
+      certGroup.style.display = 'none';
+    }
+  });
+</script>
+
+</body>
+</html>
