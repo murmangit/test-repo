@@ -1,1 +1,15 @@
-test
+script {
+    def jsonPayload = groovy.json.JsonOutput.toJson(config)
+    def curlCommand = """
+        curl -s -o response.txt -w "%{http_code}" \\
+        -X ${method} '${apiUrl}' \\
+        -u ${username}:${password} \\
+        -H 'Content-Type: application/json' \\
+        -d @- <<EOF
+    ${jsonPayload}
+    EOF
+    """
+    def response = sh(script: curlCommand, returnStdout: true).trim()
+    
+    echo "Response: ${response}"
+}
