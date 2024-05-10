@@ -1,1 +1,46 @@
-test
+pipeline {
+    agent any
+
+    stages {
+        stage('Unzip File') {
+            steps {
+                script {
+                    // Assuming the zip file is already in the workspace
+                    def zipFile = 'myfilename.zip'
+                    def outputDir = zipFile.take(zipFile.lastIndexOf('.'))
+
+                    // Unzip the file
+                    sh "unzip -o ${zipFile} -d ${outputDir}"
+                }
+            }
+        }
+
+        stage('Find and Read JSON File') {
+            steps {
+                script {
+                    // Assume filename is passed as a parameter to the job
+                    def filename = params.FILE_NAME
+                    // Update searchPath to include the output directory from the unzip stage
+                    def searchPath = "${WORKSPACE}/${outputDir}/kafka-connector/sink-connector/dev/create-connector"
+
+                    // Navigate to the output directory
+                    dir(searchPath) {
+                        // Find the JSON file within subdirectories
+                        def filePath = sh(script: "find . -name ${filename}", returnStdout: true).trim()
+
+                        if (filePath == '') {
+                            echo "File not found"
+                            return
+                        }
+
+                        // Read file and store content in an environment variable
+                        env.JSON_CONTENT = readFile(filePath).trim()
+                        // Print the file content to the console
+                        echo "Content of ${filename}:"
+                        echo "${env.JSON_CONTENT}"
+                    }
+                }
+            }
+        }
+    }
+}
