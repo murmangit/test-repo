@@ -1,15 +1,19 @@
 script {
     def jsonPayload = groovy.json.JsonOutput.toJson(config)
+    // Write the JSON payload to a file
+    writeFile file: 'payload.json', text: jsonPayload
+    
     def curlCommand = """
         curl -s -o response.txt -w "%{http_code}" \\
         -X ${method} '${apiUrl}' \\
         -u ${username}:${password} \\
         -H 'Content-Type: application/json' \\
-        -d @- <<EOF
-    ${jsonPayload}
-    EOF
+        -d @payload.json
     """
     def response = sh(script: curlCommand, returnStdout: true).trim()
+    
+    // Optionally, clean up the payload file after use
+    sh "rm -f payload.json"
     
     echo "Response: ${response}"
 }
