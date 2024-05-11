@@ -1,6 +1,23 @@
-results.each { result ->
-                        String formattedName = result.name.padRight(15)
-                        String formattedStatus = result.status.padRight(6)
-                        String formattedReason = result.reason.padRight(22)
-                        echo "| ${formattedName} | ${formattedStatus} | ${formattedReason} |"
+        def subtypeMap = [
+                        'HttpSink': 'HttpSinkConnector',
+                        'S3Sink': 'S3SinkConnector',
+                        'SqsSource': 'SqsSourceConnector'
+                    ]
+                    def connectors = []
+                    if (params.UPDATE_ALL_CONNECTORS) {
+                        // Fetch list of all connectors
+                        def apiUrl = "http://test.kafka.com/list"
+                        def connectorList = sh(script: "curl -s '${apiUrl}'", returnStdout: true).trim()
+                        def connectorObjects = new groovy.json.JsonSlurper().parseText(connectorList)
+
+                        // Filter connectors based on mapped type and subtype
+                        String expectedType = subtypeMap[params.subtype] // Get the full connector type from map
+                        connectorObjects.each {
+                            if (it.type == expectedType) {
+                                connectors << it.connector_name
+                            }
+                        }
+                    } else {
+                        // Use provided connector names
+                        connectors = params.CONNECTOR_NAME.split(',').collect { it.trim() }
                     }
