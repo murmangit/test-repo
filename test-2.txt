@@ -1,1 +1,6 @@
-test
+results.each { result ->
+                        String formattedName = result.name.padRight(15)
+                        String formattedStatus = result.status.padRight(6)
+                        String formattedReason = result.reason.padRight(22)
+                        echo "| ${formattedName} | ${formattedStatus} | ${formattedReason} |"
+                    }
