@@ -1,5 +1,125 @@
-        string(
-            name: 'CONNECTOR_NAME',
-            defaultValue: '',  // Default empty
-            description: 'Enter the name of the connector(s) you wish to update:\n- Leave blank if updating all connectors.\n- For multiple connectors, use comma-separated values (e.g., "connector-1, connector-2").'
-        )
+void getConnectorConfig(String connectorName, String searchPath) {
+    def fileContent = null
+    dir(searchPath) {
+        // Assuming each connector's configuration file is named after the connector
+        def filename = "${connectorName}.json"
+        def filePath = sh(script: "find . -name ${filename}", returnStdout: true).trim()
+
+        if (filePath == '') {
+            echo "File not found for connector: ${connectorName}"
+            return null
+        }
+
+        fileContent = readFile(filePath).trim()
+        echo "Content of ${filename}:"
+        echo fileContent
+    }
+    return fileContent
+}
+
+
+pipeline {
+    agent any
+    stages {
+        stage('Modify Multiple Connectors') {
+            when {
+                expression { params.action == 'Modify' }
+            }
+            steps {
+                script {
+                    // Split the connector names and trim spaces
+                    def connectors = params.connectorName.split(',').collect { it.trim() }
+                    def results = []
+
+                    for (connector in connectors) {
+                        try {
+                            echo "Updating connector: ${connector}"
+                            String baseApiUrl = "http://test.kafka.com/${connector}"
+
+                            // Pause connector
+                            String pauseEndpoint = "${baseApiUrl}/pause"
+                            pauseresume(pauseEndpoint)
+                            sleep(time: 5, unit: 'SECONDS')
+
+                            // Modify connector
+                            def result = getConnectorConfig(connector, env.searchPath)
+                            def connectorConfig = new groovy.json.JsonSlurper().parseText(result)
+                            connectorConfig.plugin.config['test.value'] = params.env == 'DEV' ? env.DEV_TEXT : env.UAT_TEXT
+
+                            String configEndpoint = "${baseApiUrl}/config"
+                            invokeApi(configEndpoint, connectorConfig, 'PUT', false)
+                            sleep(time: 5, unit: 'SECONDS')
+
+                            // Resume connector
+                            String resumeEndpoint = "${baseApiUrl}/resume"
+                            pauseresume(resumeEndpoint)
+
+                            results << [name: connector, status: 'Success', reason: '']
+                        } catch (Exception e) {
+                            echo "Failed to update connector ${connector}: ${e.message}"
+                            results << [name: connector, status: 'Failed', reason: e.message]
+                            // Continue with the next connector
+                        }
+                    }
+
+                    // Report results
+                    echo "Update Results:"
+                    results.each { result ->
+                        echo "${result.name}, ${result.status}, ${result.reason}"
+                    }
+
+                    // Fail the build if any connector updates failed
+                    if (results.any { it.status == 'Failed' }) {
+                        error "One or more connectors failed to update."
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+pipeline {
+    agent any
+    stages {
+        stage('Modify Multiple Connectors') {
+            when {
+                expression { params.action == 'Modify' }
+            }
+            steps {
+                script {
+                    def connectors = params.connectorName.split(',').collect { it.trim() }
+                    def results = []
+
+                    for (connector in connectors) {
+                        try {
+                            echo "Processing connector: ${connector}"
+                            // Your existing code for updating connectors goes here...
+                            
+                            results << [name: connector, status: 'Success', reason: '']
+                        } catch (Exception e) {
+                            echo "Failed to update connector ${connector}: ${e.message}"
+                            results << [name: connector, status: 'Failed', reason: e.message]
+                        }
+                    }
+
+                    // Print results in ASCII table format
+                    echo "\nConnector Update Results:"
+                    echo "+-----------------+--------+------------------------+"
+                    echo "| Connector Name  | Status | Reason                 |"
+                    echo "+-----------------+--------+------------------------+"
+                    results.each { result ->
+                        printf("| %-15s | %-6s | %-22s |\n", result.name, result.status, result.reason)
+                    }
+                    echo "+-----------------+--------+------------------------+"
+
+                    // Fail the build if any connector updates failed
+                    if (results.any { it.status == 'Failed' }) {
+                        error "One or more connectors failed to update."
+                    }
+                }
+            }
+        }
+    }
+}
+
