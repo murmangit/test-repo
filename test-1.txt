@@ -50,6 +50,10 @@
             box-sizing: border-box;
         }
 
+        input[type="text"][readonly] {
+            background-color: #e9ecef;
+        }
+
         .suffix {
             position: absolute;
             right: 0;
