@@ -1,1 +1,85 @@
-test
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cert Details Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+
+        .cert-container {
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            width: 300px;
+        }
+
+        .toggle-button {
+            background: #007BFF;
+            border: none;
+            color: white;
+            padding: 6px 12px;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .cert-details {
+            display: none;
+            padding-top: 10px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <div class="cert-container">
+        <button class="toggle-button">+</button> Cert
+        <div class="cert-details">
+            <label for="dev">Dev:</label>
+            <input type="text" id="dev" name="dev">
+            
+            <label for="qa">QA:</label>
+            <input type="text" id="qa" name="qa">
+            
+            <label for="uat">UAT:</label>
+            <input type="text" id="uat" name="uat">
+            
+            <label for="prod">PROD:</label>
+            <input type="text" id="prod" name="prod">
+        </div>
+    </div>
+
+    <script>
+        document.querySelector('.toggle-button').addEventListener('click', function() {
+            const details = document.querySelector('.cert-details');
+            const button = document.querySelector('.toggle-button');
+            if (details.style.display === 'none') {
+                details.style.display = 'block';
+                button.textContent = '-';
+            } else {
+                details.style.display = 'none';
+                button.textContent = '+';
+            }
+        });
+    </script>
+</body>
+</html>
