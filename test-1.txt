@@ -1,30 +1,19 @@
-management:
-  endpoint:
-    env:
-      keys-to-sanitize: password, secret, key, token
-    configprops:
-      keys-to-sanitize: password, secret, key, token
-
-
-import org.springframework.boot.actuate.env.EnvironmentEndpoint;
-import org.springframework.boot.actuate.context.properties.ConfigurationPropertiesReportEndpoint;
+import org.springframework.boot.actuate.endpoint.SanitizingFunction;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import java.util.Set;
 
 @Configuration
-public class ActuatorConfig {
+public class ActuatorSanitizerConfig {
 
     @Bean
-    public EnvironmentEndpoint environmentEndpoint() {
-        EnvironmentEndpoint envEndpoint = new EnvironmentEndpoint();
-        envEndpoint.setKeysToSanitize("password", "secret", "key", "token");
-        return envEndpoint;
-    }
-
-    @Bean
-    public ConfigurationPropertiesReportEndpoint configPropertiesReportEndpoint() {
-        ConfigurationPropertiesReportEndpoint configPropsEndpoint = new ConfigurationPropertiesReportEndpoint();
-        configPropsEndpoint.setKeysToSanitize("password", "secret", "key", "token");
-        return configPropsEndpoint;
+    public SanitizingFunction passwordSanitizer() {
+        return (data, showUnsanitized) -> {
+            Set<String> keysToSanitize = Set.of("password", "secret", "token", "spring.security.user.password");
+            if (keysToSanitize.contains(data.getKey())) {
+                return data.withValue("****");
+            }
+            return data;
+        };
     }
 }
