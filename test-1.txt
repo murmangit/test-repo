@@ -1,16 +1,20 @@
+import org.springframework.boot.actuate.endpoint.SanitizableData;
 import org.springframework.boot.actuate.endpoint.SanitizingFunction;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import java.util.Set;
+
+import java.util.regex.Pattern;
 
 @Configuration
 public class ActuatorSanitizerConfig {
 
     @Bean
     public SanitizingFunction passwordSanitizer() {
-        return (data, showUnsanitized) -> {
-            Set<String> keysToSanitize = Set.of("password", "secret", "token", "spring.security.user.password");
-            if (keysToSanitize.contains(data.getKey())) {
+        // Regex pattern to match keys containing 'password', 'secret', or 'token'
+        Pattern sensitivePattern = Pattern.compile(".*(password|secret|token).*", Pattern.CASE_INSENSITIVE);
+
+        return (SanitizableData data) -> {
+            if (sensitivePattern.matcher(data.getKey()).matches()) {
                 return data.withValue("****");
             }
             return data;
