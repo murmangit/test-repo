@@ -1,41 +1,12 @@
-import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
-import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
-import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
-
-import java.util.HashMap;
-import java.util.Map;
-
-@Component
-@Endpoint(id = "custom-configprops")
-public class CustomConfigPropsEndpoint {
-
-    private final Environment environment;
-
-    public CustomConfigPropsEndpoint(Environment environment) {
-        this.environment = environment;
-    }
-
-    @ReadOperation
-    public Map<String, Object> configProps() {
-        Map<String, Object> sanitizedProperties = new HashMap<>();
-
-        // Loop through properties and sanitize sensitive ones
-        for (String propertyName : environment.getPropertySources().getPropertyNames()) {
-            String propertyValue = environment.getProperty(propertyName);
-            if (isSensitiveKey(propertyName)) {
-                sanitizedProperties.put(propertyName, "****");  // Mask sensitive value
-            } else {
-                sanitizedProperties.put(propertyName, propertyValue);
-            }
-        }
-
-        return sanitizedProperties;
-    }
-
-    // Define sensitive keys that need to be masked
-    private boolean isSensitiveKey(String key) {
-        return key.matches(".*password.*") || key.matches(".*secret.*") || key.matches(".*token.*")
-                || key.matches(".*key.*") || key.matches(".*credentials.*");
-    }
-}
+management:
+  endpoint:
+    env:
+      show-values: ALWAYS
+      keys-to-sanitize:
+        - ".*password.*"
+        - ".*secret.*"
+        - ".*key.*"
+        - ".*token.*"
+        - ".*credentials.*"
+        - "dbPassword"
+        - "keyStorePassword"
