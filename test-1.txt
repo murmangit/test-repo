@@ -9,13 +9,16 @@ import java.util.regex.Pattern;
 public class ActuatorSanitizerConfig {
 
     @Bean
-    public SanitizingFunction passwordSanitizer() {
-        // Regex pattern to match keys containing 'password', 'secret', or 'token'
-        Pattern sensitivePattern = Pattern.compile(".*(password|secret|token).*", Pattern.CASE_INSENSITIVE);
+    public SanitizingFunction customSanitizer() {
+        // Regex pattern to match keys containing sensitive terms
+        Pattern sensitivePattern = Pattern.compile(
+                ".*(password|token|secret|aws_credentials_load_type|adminSecret|ketStorePassword|REDS_PASSWORD|sun\\.java\\.command).*", 
+                Pattern.CASE_INSENSITIVE
+        );
 
         return (SanitizableData data) -> {
             if (sensitivePattern.matcher(data.getKey()).matches()) {
-                return data.withValue("****");
+                return data.withValue("****");  // Replace sensitive values with ****
             }
             return data;
         };
