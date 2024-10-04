@@ -1,1 +1,48 @@
-test
+management:
+  endpoint:
+    env:
+      show-values: ALWAYS
+      keys-to-sanitize: ".*password.*", ".*secret.*", ".*key.*", ".*token.*", ".*credentials.*", "dbPassword", "keyStorePassword"
+    configprops:
+      show-values: ALWAYS
+      keys-to-sanitize: ".*password.*", ".*secret.*", ".*key.*", ".*token.*", ".*credentials.*", "dbPassword", "keyStorePassword"
+
+
+import org.springframework.boot.actuate.context.properties.ConfigurationPropertiesReportEndpoint;
+import org.springframework.boot.actuate.context.properties.ConfigurationPropertiesReportEndpoint.ApplicationConfigurationProperties;
+import org.springframework.boot.actuate.context.properties.ConfigurationPropertiesReportEndpoint.ContextConfigurationProperties;
+import org.springframework.boot.actuate.endpoint.Sanitizer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.util.Map;
+
+@Configuration
+public class CustomSanitizerConfig {
+
+    // Apply the default Spring Boot sanitizing behavior
+    @Bean
+    public Sanitizer sanitizer() {
+        return new Sanitizer();
+    }
+
+    // Custom logic for sanitizing configuration properties
+    @Bean
+    public ConfigurationPropertiesReportEndpoint configurationPropertiesReportEndpoint(Sanitizer sanitizer) {
+        return new ConfigurationPropertiesReportEndpoint() {
+            @Override
+            public Map<String, ContextConfigurationProperties> configurationProperties() {
+                Map<String, ContextConfigurationProperties> props = super.configurationProperties();
+                props.forEach((key, contextConfigurationProperties) -> {
+                    ApplicationConfigurationProperties appProps = contextConfigurationProperties.getConfigurationProperties();
+                    appProps.getProperties().forEach((propKey, propValue) -> {
+                        if (sanitizer.sanitize(propKey, propValue.get("value")) != null) {
+                            propValue.put("value", "****");  // Sanitize sensitive value
+                        }
+                    });
+                });
+                return props;
+            }
+        };
+    }
+}
