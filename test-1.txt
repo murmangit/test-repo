@@ -1,12 +1,30 @@
 management:
   endpoint:
     env:
-      show-values: ALWAYS
-      keys-to-sanitize:
-        - ".*password.*"
-        - ".*secret.*"
-        - ".*key.*"
-        - ".*token.*"
-        - ".*credentials.*"
-        - "dbPassword"
-        - "keyStorePassword"
+      keys-to-sanitize: password, secret, key, token
+    configprops:
+      keys-to-sanitize: password, secret, key, token
+
+
+import org.springframework.boot.actuate.env.EnvironmentEndpoint;
+import org.springframework.boot.actuate.context.properties.ConfigurationPropertiesReportEndpoint;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class ActuatorConfig {
+
+    @Bean
+    public EnvironmentEndpoint environmentEndpoint() {
+        EnvironmentEndpoint envEndpoint = new EnvironmentEndpoint();
+        envEndpoint.setKeysToSanitize("password", "secret", "key", "token");
+        return envEndpoint;
+    }
+
+    @Bean
+    public ConfigurationPropertiesReportEndpoint configPropertiesReportEndpoint() {
+        ConfigurationPropertiesReportEndpoint configPropsEndpoint = new ConfigurationPropertiesReportEndpoint();
+        configPropsEndpoint.setKeysToSanitize("password", "secret", "key", "token");
+        return configPropsEndpoint;
+    }
+}
